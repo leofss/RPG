@@ -17,39 +17,43 @@ public class Session {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private int current_ally_health_points;
+    private int currentAllyHealthPoints;
 
-    private int current_enemy_health_points;
+    private int currentEnemyHealthPoints;
 
-    private String session_id;
+    private String sessionId;
 
-    private int ally_roll_number;
+    private int allyRollNumber;
 
-    private int enemy_roll_number;
+    private int enemyRollNumber ;
 
-    private SessionTeamEnum current_turn;
+    private SessionTeamEnum currentTurn;
 
     @ManyToOne
     @JoinColumn(name = "ally_id")
-    private Character character_ally;
+    private Character characterAlly;
 
     @ManyToOne
     @JoinColumn(name = "enemy_id")
-    private Character character_enemy;
-    public Session(int current_ally_health_points , int current_enemy_health_points, String session_id,
-                   int ally_roll_number, int enemy_roll_number, Character character_ally,
-                   Character character_enemy, SessionTeamEnum current_turn) {
-        this.current_ally_health_points = current_ally_health_points;
-        this.current_enemy_health_points = current_enemy_health_points;
-        this.session_id = session_id;
-        this.ally_roll_number = ally_roll_number;
-        this.enemy_roll_number = enemy_roll_number;
-        this.character_enemy = character_enemy;
-        this.character_ally = character_ally;
-        this.current_turn = current_turn;
+    private Character characterEnemy;
+
+    private int turnCount;
+
+
+    public Session(int currentAllyHealthPoints, int currentEnemyHealthPoints, String sessionId, int allyRollNumber,
+                   int enemyRollNumber, SessionTeamEnum currentTurn, Character characterAlly, Character characterEnemy, int turnCount) {
+        this.currentAllyHealthPoints = currentAllyHealthPoints;
+        this.currentEnemyHealthPoints = currentEnemyHealthPoints;
+        this.sessionId = sessionId;
+        this.allyRollNumber = allyRollNumber;
+        this.enemyRollNumber = enemyRollNumber;
+        this.currentTurn = currentTurn;
+        this.characterAlly = characterAlly;
+        this.characterEnemy = characterEnemy;
+        this.turnCount = turnCount;
     }
 
     public SessionResponseDto SessionToResponseDto(){
-        return new SessionResponseDto(this.session_id);
+        return new SessionResponseDto(this.sessionId);
     }
 }

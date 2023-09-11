@@ -28,7 +28,7 @@ public class SessionService {
 
     private boolean checkIfEnemyIsMonster(Long id){
         Optional<Character> character = characterRepository.findById(id);
-        CharacterType type = character.get().getCharacter_type();
+        CharacterType type = character.get().getCharacterType();
         return type == CharacterType.MONSTER;
     }
 
@@ -41,10 +41,15 @@ public class SessionService {
         return character.get();
     }
 
+    private Session retrieveSessionByUuid(String session_id){
+        Session session = sessionRepository.findSessionBySessionId(session_id);
+        return session;
+    }
+
     private Optional<Character> retrieveRandomMonster(){
         List<Character> characterList = characterRepository.findAll();
         return characterList.stream()
-                .filter(character -> character.getCharacter_type() == CharacterType.MONSTER)
+                .filter(character -> character.getCharacterType() == CharacterType.MONSTER)
                 .findFirst();
 
     }
@@ -82,8 +87,8 @@ public class SessionService {
 
                 SessionTeamEnum currentTurn = (allyRoll > enemyRoll) ? SessionTeamEnum.ALLY : SessionTeamEnum.ENEMY;
 
-                Session session = new Session(characterAlly.getHealth_points(), characterEnemy.getHealth_points(),
-                        sessionId, allyRoll, enemyRoll, characterAlly, characterEnemy, currentTurn);
+                Session session = new Session(characterAlly.getHealthPoints(), characterEnemy.getHealthPoints(),
+                        sessionId, allyRoll, enemyRoll, currentTurn, characterAlly, characterEnemy, 0);
 
                 this.sessionRepository.save(session);
 

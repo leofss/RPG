@@ -17,11 +17,11 @@ public class Character {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private CharacterType character_type;
+    private CharacterType characterType;
 
     private String name;
 
-    private int health_points;
+    private int healthPoints;
 
     private int strength;
 
@@ -29,19 +29,19 @@ public class Character {
 
     private int agility;
 
-    private int dice_times_roll;
+    private int diceTimesRoll;
 
-    private int dice_faces;
+    private int diceFaces;
 
     public Character(CharacterDto characterDto){
-        this.character_type = characterDto.character_type();
+        this.characterType = characterDto.character_type();
         this.name = characterDto.name();
-        this.health_points = characterDto.health_points();
+        this.healthPoints = characterDto.health_points();
         this.strength = characterDto.strength();
         this.defense = characterDto.defense();
         this.agility = characterDto.agility();
-        this.dice_times_roll = characterDto.dice_times_roll();
-        this.dice_faces = characterDto.dice_faces();
+        this.diceTimesRoll = characterDto.dice_times_roll();
+        this.diceTimesRoll = characterDto.dice_faces();
     }
 
     public Character(CharacterDto characterDto, Long id){
@@ -50,8 +50,8 @@ public class Character {
     }
 
     public CharacterDto CharacterToDto(){
-        return new CharacterDto(this.id, this.character_type, this.name, this.health_points, this.strength, this.defense,
-                this.agility, this.dice_times_roll, this.dice_faces);
+        return new CharacterDto(this.id, this.characterType, this.name, this.healthPoints, this.strength, this.defense,
+                this.agility, this.diceTimesRoll, this.diceTimesRoll);
     }
 
 
