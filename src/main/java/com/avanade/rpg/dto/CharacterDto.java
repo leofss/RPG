@@ -1,7 +1,12 @@
 package com.avanade.rpg.dto;
 
-public record CharacterDto(Long id, CharacterType character_type, int health_points, int strength, int defense,
+public record CharacterDto(Long id, CharacterType character_type, String name, int health_points, int strength, int defense,
                            int agility, int dice_times_roll, int dice_faces) {
+    @Override
+    public String name() {
+        return name;
+    }
+
     @Override
     public Long id() {
         return id;

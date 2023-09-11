@@ -19,6 +19,8 @@ public class Character {
 
     private CharacterType character_type;
 
+    private String name;
+
     private int health_points;
 
     private int strength;
@@ -33,6 +35,7 @@ public class Character {
 
     public Character(CharacterDto characterDto){
         this.character_type = characterDto.character_type();
+        this.name = characterDto.name();
         this.health_points = characterDto.health_points();
         this.strength = characterDto.strength();
         this.defense = characterDto.defense();
@@ -47,7 +50,7 @@ public class Character {
     }
 
     public CharacterDto CharacterToDto(){
-        return new CharacterDto(this.id, this.character_type, this.health_points, this.strength, this.defense,
+        return new CharacterDto(this.id, this.character_type, this.name, this.health_points, this.strength, this.defense,
                 this.agility, this.dice_times_roll, this.dice_faces);
     }
 
