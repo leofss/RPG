@@ -27,6 +27,8 @@ public class Session {
 
     private int enemy_roll_number;
 
+    private SessionTeamEnum current_turn;
+
     @ManyToOne
     @JoinColumn(name = "ally_id")
     private Character character_ally;
@@ -36,7 +38,7 @@ public class Session {
     private Character character_enemy;
     public Session(int current_ally_health_points , int current_enemy_health_points, String session_id,
                    int ally_roll_number, int enemy_roll_number, Character character_ally,
-                   Character character_enemy) {
+                   Character character_enemy, SessionTeamEnum current_turn) {
         this.current_ally_health_points = current_ally_health_points;
         this.current_enemy_health_points = current_enemy_health_points;
         this.session_id = session_id;
@@ -44,6 +46,7 @@ public class Session {
         this.enemy_roll_number = enemy_roll_number;
         this.character_enemy = character_enemy;
         this.character_ally = character_ally;
+        this.current_turn = current_turn;
     }
 
     public SessionResponseDto SessionToResponseDto(){

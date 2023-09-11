@@ -80,8 +80,10 @@ public class SessionService {
                     enemyRoll = RollTwentyFacesDice();
                 } while (allyRoll == enemyRoll);
 
+                SessionTeamEnum currentTurn = (allyRoll > enemyRoll) ? SessionTeamEnum.ALLY : SessionTeamEnum.ENEMY;
+
                 Session session = new Session(characterAlly.getHealth_points(), characterEnemy.getHealth_points(),
-                        sessionId, allyRoll, enemyRoll, characterAlly, characterEnemy);
+                        sessionId, allyRoll, enemyRoll, characterAlly, characterEnemy, currentTurn);
 
                 this.sessionRepository.save(session);
 
