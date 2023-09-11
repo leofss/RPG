@@ -12,6 +12,11 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
             "FROM sessions s WHERE s.id = :sessionId")
     boolean isAlly(@Param("sessionId") Long sessionId, @Param("attackerId") Long attackerId);
 
+    @Query(nativeQuery = true, value = "SELECT COUNT(s) > 0 FROM sessions s " +
+            "WHERE s.id = :sessionId " +
+            "AND (:characterId IN (s.ally_id) OR :characterId IN (s.enemy_id))")
+    boolean isCharacterInSession(@Param("sessionId") Long sessionId, @Param("characterId") Long characterId);
+
 
 
 }

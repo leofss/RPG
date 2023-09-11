@@ -7,10 +7,8 @@ import com.avanade.rpg.repository.CharacterRepository;
 import com.avanade.rpg.repository.SessionRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.cfg.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -22,7 +20,6 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -78,21 +75,20 @@ public class SessionService {
         objectMapper.findAndRegisterModules();
 
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest getRequest = HttpRequest.newBuilder()
                 .uri(new URI(serverUrl))
                 .GET()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
 
         HttpResponse<String> response = client.send(
-                request,
+                getRequest,
                 HttpResponse.BodyHandlers.ofString()
         );
 
         JsonNode jsonResponse = objectMapper.readTree(response.body());
-        int result = jsonResponse.get("result").asInt();
 
-        return result;
+        return jsonResponse.get("result").asInt();
     }
 
     public int rollDice(int numRolls, int numFaces){
@@ -111,10 +107,18 @@ public class SessionService {
         return sessionRepository.isAlly(sessionId, id);
     }
 
-    private void updateSessionTurn(Session session){
-        Session sessionUpdated = new Session();
-        int turnCount = sessionUpdated.getTurnCount();
-        sessionUpdated.setTurnCount(turnCount + 1);
+    private void updateSessionTurnAndTeam(Long sessionId, SessionTeamEnum currentEnum){
+        Session currentSession = retrieveSessionById(sessionId);
+        int turnCount = currentSession.getTurnCount();
+        currentSession.setTurnCount(turnCount + 1);
+
+        if(currentEnum.equals(SessionTeamEnum.ALLY)){
+            currentSession.setCurrentTurn(SessionTeamEnum.ENEMY);
+        }else{
+            currentSession.setCurrentTurn(SessionTeamEnum.ALLY);
+        }
+
+        sessionRepository.save(currentSession);
     }
 
     private int updateSessionHealthPoints(Long sessionId, SessionTeamEnum currentTurn, int damage){
@@ -140,22 +144,19 @@ public class SessionService {
 
     }
 
-    private void updateSessionTurn(SessionTeamEnum currentEnum, Long sessionId){
-        Session currentSession = retrieveSessionById(sessionId);
-        if(currentEnum.equals(SessionTeamEnum.ALLY)){
-            currentSession.setCurrentTurn(SessionTeamEnum.ENEMY);
-        }else{
-            currentSession.setCurrentTurn(SessionTeamEnum.ALLY);
-        }
-    }
 
     private boolean isAttackerTurn(Session session, SessionTeamEnum currentAttackerTeam) {
-        return !session.isSessionOver() && session.getCurrentTurn().equals(currentAttackerTeam);
+        return session.getCurrentTurn().equals(currentAttackerTeam);
+    }
+
+    private boolean isCharacterInSession(Long sessionId, Long characterId){
+        return sessionRepository.isCharacterInSession(sessionId, characterId);
     }
 
     public SessionResponseDto createSession(SessionRequestDto requestDto){
         Long allyId = requestDto.ally_id();
         Long enemyId = requestDto.enemy_id();
+
 
         if(enemyId == null){
             Optional<Character> character = retrieveRandomMonster();
@@ -194,48 +195,54 @@ public class SessionService {
 
     public TurnResponseDto playTurn(TurnRequestDto turnRequestDto) throws Exception {
         Session session = retrieveSessionById(turnRequestDto.session_id());
-        if(session.isSessionOver()){
+
+        if (session.isSessionOver()) {
             return new TurnResponseDto(0, 10, session.isSessionOver(),
                     "Sessão encerrada!");
         }
+
         Long attackerId = turnRequestDto.attacker_id();
         Long defenderId = turnRequestDto.defender_id();
 
-        if (defenderId == attackerId) {
-            return new TurnResponseDto(0, 10, session.isSessionOver(),
-                    "Não é possível atacar a si mesmo");
+        if (!isCharacterInSession(session.getId(), attackerId) || !isCharacterInSession(session.getId(), defenderId)) {
+            return null;
+        }
+
+        if (defenderId.equals(attackerId)) {
+            return new TurnResponseDto(0, 10, session.isSessionOver()
+                    , "Não é possível atacar a si mesmo");
         }
 
         SessionTeamEnum currentAttackerTeam = isAlly(session.getId(), attackerId) ? SessionTeamEnum.ALLY
                 : SessionTeamEnum.ENEMY;
 
-        if (isAttackerTurn(session, currentAttackerTeam)) {
-            int defenseResult = getResultFromCalculate("defense", defenderId);
-            int attackResult = getResultFromCalculate("attack", attackerId);
-
-            int damage;
-            int updatedHp;
-
-            if (attackResult > defenseResult) {
-                damage = getResultFromCalculate("damage", attackerId);
-                updatedHp = updateSessionHealthPoints(session.getId(), currentAttackerTeam, damage);
-
-                if (updatedHp <= 0) {
-                    updateSessionTurn(session);
-                    endSession(session.getId());
-                    return new TurnResponseDto(damage, updatedHp, true, "Defensor foi abatido!");
-                }
-
-                updateSessionTurn(session);
-                return new TurnResponseDto(damage, updatedHp, session.isSessionOver(), "Ataque com Sucesso");
-            } else {
-                updateSessionTurn(session);
-                return new TurnResponseDto(0, 10, session.isSessionOver(),
-                        "Ataque falhou");
-            }
-        } else {
+        if (!isAttackerTurn(session, currentAttackerTeam)) {
             return new TurnResponseDto(0, 10, session.isSessionOver(),
                     "Não é seu turno");
+        }
+
+        int defenseResult = getResultFromCalculate("defense", defenderId);
+        int attackResult = getResultFromCalculate("attack", attackerId);
+
+        int damage;
+        int updatedHp;
+
+        if (attackResult > defenseResult) {
+            damage = getResultFromCalculate("damage", attackerId);
+            updatedHp = updateSessionHealthPoints(session.getId(), currentAttackerTeam, damage);
+
+            if (updatedHp <= 0) {
+                updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
+                endSession(session.getId());
+                return new TurnResponseDto(damage, updatedHp, true, "Defensor foi abatido!");
+            }
+
+            updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
+            return new TurnResponseDto(damage, updatedHp, session.isSessionOver(), "Ataque com Sucesso");
+        } else {
+            updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
+            return new TurnResponseDto(0, 10, session.isSessionOver(),
+                    "Ataque falhou");
         }
     }
 }
