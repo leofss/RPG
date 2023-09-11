@@ -3,15 +3,12 @@ package com.avanade.rpg.service;
 import com.avanade.rpg.dto.CharacterDto;
 import com.avanade.rpg.entity.Character;
 import com.avanade.rpg.repository.CharacterRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-@Slf4j
 public class CharacterService {
     private final CharacterRepository characterRepository;
 
@@ -45,7 +42,6 @@ public class CharacterService {
     public void deleteCharacter(Long id){
         this.characterRepository.deleteById(id);
     }
-
 
 
 }
