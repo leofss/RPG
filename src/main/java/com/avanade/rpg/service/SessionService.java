@@ -54,9 +54,21 @@ public class SessionService {
 
     }
 
-    private int RollTwentyFacesDice(){
+    public int rollDice(int numRolls, int numFaces){
         Random random = new Random();
-        return random.nextInt(20) + 1;
+        int result = 0;
+
+        for (int i = 0; i < numRolls; i++) {
+            int roll = random.nextInt(numFaces);
+            result += roll;
+        }
+
+        return result;
+    }
+
+    private SessionTeamEnum retrieveCharacterTeam(Long id){
+        SessionTeamEnum characterTeam = sessionRepository.findTeamByCharacterId(id);
+        return characterTeam;
     }
 
     public SessionResponseDto createSession(SessionRequestDto requestDto){
@@ -81,14 +93,14 @@ public class SessionService {
                 int allyRoll;
                 int enemyRoll;
                 do {
-                    allyRoll = RollTwentyFacesDice();
-                    enemyRoll = RollTwentyFacesDice();
+                    allyRoll = rollDice(1, 20);
+                    enemyRoll = rollDice(1, 20);
                 } while (allyRoll == enemyRoll);
 
                 SessionTeamEnum currentTurn = (allyRoll > enemyRoll) ? SessionTeamEnum.ALLY : SessionTeamEnum.ENEMY;
 
                 Session session = new Session(characterAlly.getHealthPoints(), characterEnemy.getHealthPoints(),
-                        sessionId, allyRoll, enemyRoll, currentTurn, characterAlly, characterEnemy, 0);
+                        sessionId, allyRoll, enemyRoll, currentTurn, characterAlly, characterEnemy, 0, false);
 
                 this.sessionRepository.save(session);
 
@@ -97,5 +109,34 @@ public class SessionService {
             return null;
         }
         return null;
+    }
+
+    public String playTurn(TurnRequestDto turnRequestDto){
+        Session session = retrieveSessionByUuid(turnRequestDto.session_id());
+        Long attackerId = turnRequestDto.attacker_id();
+        Long defenderId = turnRequestDto.defender_id();
+
+        if(defenderId == attackerId){
+
+        }
+
+        Character characterAttacker = retrieveCharacterById(attackerId);
+        Character characterDefender = retrieveCharacterById(defenderId);
+
+
+        SessionTeamEnum currentAttackerTeam = retrieveCharacterTeam(attackerId);
+        SessionTeamEnum currentTurnTeam = session.getCurrentTurn();
+
+        if(currentTurnTeam.equals(currentAttackerTeam)){
+            if(!session.isSessionOver()){
+
+            }
+        }
+
+
+//        int currentTurnCount = session.getTurnCount();
+//        session.setTurnCount(currentTurnCount + 1);
+//        sessionRepository.save(session);
+        return "hey";
     }
 }

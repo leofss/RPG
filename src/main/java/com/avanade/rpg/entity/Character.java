@@ -41,7 +41,7 @@ public class Character {
         this.defense = characterDto.defense();
         this.agility = characterDto.agility();
         this.diceTimesRoll = characterDto.dice_times_roll();
-        this.diceTimesRoll = characterDto.dice_faces();
+        this.diceFaces = characterDto.dice_faces();
     }
 
     public Character(CharacterDto characterDto, Long id){
@@ -51,7 +51,7 @@ public class Character {
 
     public CharacterDto CharacterToDto(){
         return new CharacterDto(this.id, this.characterType, this.name, this.healthPoints, this.strength, this.defense,
-                this.agility, this.diceTimesRoll, this.diceTimesRoll);
+                this.agility, this.diceTimesRoll, this.diceFaces);
     }
 
 

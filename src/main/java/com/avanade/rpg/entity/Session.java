@@ -39,9 +39,12 @@ public class Session {
 
     private int turnCount;
 
+    private boolean isSessionOver;
+
 
     public Session(int currentAllyHealthPoints, int currentEnemyHealthPoints, String sessionId, int allyRollNumber,
-                   int enemyRollNumber, SessionTeamEnum currentTurn, Character characterAlly, Character characterEnemy, int turnCount) {
+                   int enemyRollNumber, SessionTeamEnum currentTurn, Character characterAlly, Character characterEnemy,
+                   int turnCount, boolean isSessionOver) {
         this.currentAllyHealthPoints = currentAllyHealthPoints;
         this.currentEnemyHealthPoints = currentEnemyHealthPoints;
         this.sessionId = sessionId;
@@ -51,6 +54,7 @@ public class Session {
         this.characterAlly = characterAlly;
         this.characterEnemy = characterEnemy;
         this.turnCount = turnCount;
+        this.isSessionOver = isSessionOver;
     }
 
     public SessionResponseDto SessionToResponseDto(){

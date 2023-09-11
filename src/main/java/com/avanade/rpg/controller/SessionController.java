@@ -2,6 +2,8 @@ package com.avanade.rpg.controller;
 
 import com.avanade.rpg.dto.SessionRequestDto;
 import com.avanade.rpg.dto.SessionResponseDto;
+import com.avanade.rpg.dto.TurnRequestDto;
+import com.avanade.rpg.dto.TurnResponseDto;
 import com.avanade.rpg.service.SessionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,11 @@ public class SessionController {
     @ResponseStatus(HttpStatus.CREATED)
     public SessionResponseDto createSession(@RequestBody SessionRequestDto body){
         return sessionService.createSession(body);
+    }
+
+    @PostMapping("/turn")
+    public String playTurn(@RequestBody TurnRequestDto body){
+        return sessionService.playTurn(body);
     }
 
 
