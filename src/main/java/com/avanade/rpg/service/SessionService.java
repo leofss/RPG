@@ -70,6 +70,7 @@ public class SessionService {
             boolean isEnemyMonster = checkIfEnemyIsMonster(enemyId);
             if(isEnemyMonster){
                 Character characterEnemy = retrieveCharacterById(enemyId);
+                Character characterAlly = retrieveCharacterById(allyId);
                 String sessionId = createSessionUuid();
 
                 int allyRoll;
@@ -79,17 +80,12 @@ public class SessionService {
                     enemyRoll = RollTwentyFacesDice();
                 } while (allyRoll == enemyRoll);
 
-                Session sessionEnemy = new Session(characterEnemy, characterEnemy.getHealth_points(),
-                        SessionTeamEnum.ENEMY, sessionId, allyRoll, enemyRoll);
+                Session session = new Session(characterAlly.getHealth_points(), characterEnemy.getHealth_points(),
+                        sessionId, allyRoll, enemyRoll, characterAlly, characterEnemy);
 
-                Character characterAlly = retrieveCharacterById(allyId);
-                Session sessionAlly = new Session(characterAlly, characterAlly.getHealth_points(),
-                        SessionTeamEnum.ALLY, sessionId, allyRoll, enemyRoll);
+                this.sessionRepository.save(session);
 
-                this.sessionRepository.save(sessionAlly);
-                this.sessionRepository.save(sessionEnemy);
-
-                return sessionEnemy.SessionToResponseDto();
+                return session.SessionToResponseDto();
             }
             return null;
         }

@@ -17,27 +17,33 @@ public class Session {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "character_id")
-    private Character character;
+    private int current_ally_health_points;
 
-    private int current_health_points;
-
-    private SessionTeamEnum team;
+    private int current_enemy_health_points;
 
     private String session_id;
 
     private int ally_roll_number;
 
     private int enemy_roll_number;
-    public Session(Character character, int current_health_points, SessionTeamEnum team, String session_id,
-                   int ally_roll_number, int enemy_roll_number) {
-        this.character = character;
-        this.current_health_points = current_health_points;
-        this.team = team;
+
+    @ManyToOne
+    @JoinColumn(name = "ally_id")
+    private Character character_ally;
+
+    @ManyToOne
+    @JoinColumn(name = "enemy_id")
+    private Character character_enemy;
+    public Session(int current_ally_health_points , int current_enemy_health_points, String session_id,
+                   int ally_roll_number, int enemy_roll_number, Character character_ally,
+                   Character character_enemy) {
+        this.current_ally_health_points = current_ally_health_points;
+        this.current_enemy_health_points = current_enemy_health_points;
         this.session_id = session_id;
         this.ally_roll_number = ally_roll_number;
         this.enemy_roll_number = enemy_roll_number;
+        this.character_enemy = character_enemy;
+        this.character_ally = character_ally;
     }
 
     public SessionResponseDto SessionToResponseDto(){
