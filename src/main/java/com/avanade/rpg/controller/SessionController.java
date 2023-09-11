@@ -25,7 +25,7 @@ public class SessionController {
     }
 
     @PostMapping("/turn")
-    public String playTurn(@RequestBody TurnRequestDto body){
+    public TurnResponseDto playTurn(@RequestBody TurnRequestDto body) throws Exception {
         return sessionService.playTurn(body);
     }
 

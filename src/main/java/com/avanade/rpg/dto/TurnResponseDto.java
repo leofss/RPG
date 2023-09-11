@@ -1,6 +1,7 @@
 package com.avanade.rpg.dto;
 
-public record TurnResponseDto(int damage_done, int current_defender_health_points, boolean is_session_over){
+public record TurnResponseDto(int damage_done, int current_defender_health_points, boolean is_session_over,
+                              String message){
     @Override
     public int damage_done() {
         return damage_done;
@@ -15,4 +16,5 @@ public record TurnResponseDto(int damage_done, int current_defender_health_point
     public boolean is_session_over() {
         return is_session_over;
     }
+
 }

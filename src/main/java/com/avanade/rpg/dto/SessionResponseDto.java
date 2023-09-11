@@ -1,6 +1,6 @@
 package com.avanade.rpg.dto;
 
-public record SessionResponseDto(String session_id, int ally_roll, int enemy_roll) {
+public record SessionResponseDto(Long session_id, int ally_roll, int enemy_roll) {
     @Override
     public int ally_roll() {
         return ally_roll;
@@ -12,7 +12,7 @@ public record SessionResponseDto(String session_id, int ally_roll, int enemy_rol
     }
 
     @Override
-    public String session_id() {
+    public Long session_id() {
         return session_id;
     }
 }

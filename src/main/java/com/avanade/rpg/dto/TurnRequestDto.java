@@ -1,8 +1,8 @@
 package com.avanade.rpg.dto;
 
-public record TurnRequestDto(String session_id, Long attacker_id, Long defender_id) {
+public record TurnRequestDto(Long session_id, Long attacker_id, Long defender_id) {
     @Override
-    public String session_id() {
+    public Long session_id() {
         return session_id;
     }
 
