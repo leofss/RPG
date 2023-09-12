@@ -2,8 +2,10 @@ package com.avanade.rpg.service;
 
 import com.avanade.rpg.dto.*;
 import com.avanade.rpg.entity.Character;
+import com.avanade.rpg.entity.Log;
 import com.avanade.rpg.entity.Session;
 import com.avanade.rpg.repository.CharacterRepository;
+import com.avanade.rpg.repository.LogRepository;
 import com.avanade.rpg.repository.SessionRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,13 +28,17 @@ import java.util.Random;
 public class SessionService {
     private final SessionRepository sessionRepository;
     private final CharacterRepository characterRepository;
+    private final LogRepository logRepository;
     private HttpServletRequest request;
 
+    private SessionTeamEnum firstToAttack;
+
     public SessionService(SessionRepository sessionRepository, CharacterRepository characterRepository,
-                          HttpServletRequest request) {
+                          HttpServletRequest request, LogRepository logRepository) {
         this.sessionRepository = sessionRepository;
         this.characterRepository = characterRepository;
         this.request = request;
+        this.logRepository = logRepository;
     }
 
     private boolean checkIfCharacterExistsById(Long id){
@@ -153,6 +159,20 @@ public class SessionService {
         return sessionRepository.isCharacterInSession(sessionId, characterId);
     }
 
+    private void createLog(Session session, int attackResult, int defenseResult, int damage){
+
+        Log log = new Log(session, session.getCharacterAlly(), session.getCharacterEnemy(), firstToAttack,
+                session.getTurnCount(), attackResult, defenseResult, damage, session.getCurrentAllyHealthPoints(),
+                session.getCurrentEnemyHealthPoints());
+
+        logRepository.save(log);
+
+    }
+
+    private void setFirstToAttack(SessionTeamEnum firstToAttack){
+        this.firstToAttack = firstToAttack;
+    }
+
     public SessionResponseDto createSession(SessionRequestDto requestDto){
         Long allyId = requestDto.ally_id();
         Long enemyId = requestDto.enemy_id();
@@ -177,6 +197,12 @@ public class SessionService {
                 do {
                     allyRoll = rollDice(1, 20);
                     enemyRoll = rollDice(1, 20);
+
+                    if(allyRoll > enemyRoll){
+                        setFirstToAttack(SessionTeamEnum.ALLY);
+                    }else{
+                        setFirstToAttack(SessionTeamEnum.ENEMY);
+                    }
                 } while (allyRoll == enemyRoll);
 
                 SessionTeamEnum currentTurn = (allyRoll > enemyRoll) ? SessionTeamEnum.ALLY : SessionTeamEnum.ENEMY;
@@ -227,22 +253,32 @@ public class SessionService {
         int damage;
         int updatedHp;
 
+
         if (attackResult > defenseResult) {
             damage = getResultFromCalculate("damage", attackerId);
             updatedHp = updateSessionHealthPoints(session.getId(), currentAttackerTeam, damage);
 
             if (updatedHp <= 0) {
                 updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
+                createLog(session, attackResult, defenseResult, damage);
                 endSession(session.getId());
                 return new TurnResponseDto(damage, updatedHp, true, "Defensor foi abatido!");
             }
 
             updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
+            createLog(session, attackResult, defenseResult, damage);
             return new TurnResponseDto(damage, updatedHp, session.isSessionOver(), "Ataque com Sucesso");
         } else {
             updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
+
+            damage = getResultFromCalculate("damage", attackerId);
+            createLog(session, attackResult, defenseResult, damage);
+
             return new TurnResponseDto(0, 10, session.isSessionOver(),
                     "Ataque falhou");
+
         }
+
+
     }
 }

@@ -18,7 +18,7 @@ public class CharacterService {
 
     public List<CharacterDto> getAllCharacters(){
         return this.characterRepository.findAll().stream()
-                .map(character -> character.CharacterToDto())
+                .map(Character::CharacterToDto)
                 .toList();
     }
 
