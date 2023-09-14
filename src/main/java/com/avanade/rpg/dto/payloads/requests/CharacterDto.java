@@ -1,4 +1,6 @@
-package com.avanade.rpg.dto;
+package com.avanade.rpg.dto.payloads.requests;
+
+import com.avanade.rpg.dto.CharacterType;
 
 public record CharacterDto(Long id, CharacterType character_type, String name, int health_points, int strength, int defense,
                            int agility, int dice_times_roll, int dice_faces) {

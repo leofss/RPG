@@ -1,4 +1,4 @@
-package com.avanade.rpg.dto;
+package com.avanade.rpg.dto.payloads.requests;
 
 public record TurnRequestDto(Long session_id, Long attacker_id, Long defender_id) {
     @Override

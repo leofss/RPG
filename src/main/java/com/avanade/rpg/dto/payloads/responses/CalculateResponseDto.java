@@ -1,4 +1,4 @@
-package com.avanade.rpg.dto;
+package com.avanade.rpg.dto.payloads.responses;
 
 public record CalculateResponseDto(int result) {
     @Override

@@ -1,6 +1,6 @@
 package com.avanade.rpg.service;
 
-import com.avanade.rpg.dto.LogResponseDto;
+import com.avanade.rpg.dto.payloads.responses.LogResponseDto;
 import com.avanade.rpg.entity.Log;
 import com.avanade.rpg.exceptions.EntityNotFoundException;
 import com.avanade.rpg.repository.LogRepository;

@@ -1,9 +1,8 @@
 package com.avanade.rpg.entity;
 
-import com.avanade.rpg.dto.CharacterDto;
+import com.avanade.rpg.dto.payloads.requests.CharacterDto;
 import com.avanade.rpg.dto.CharacterType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package com.avanade.rpg.dto;
+package com.avanade.rpg.dto.payloads.requests;
 
 public record SessionRequestDto(Long ally_id, Long enemy_id ) {
     @Override

@@ -1,5 +1,6 @@
-package com.avanade.rpg.dto;
+package com.avanade.rpg.dto.payloads.responses;
 
+import com.avanade.rpg.dto.SessionTeamEnum;
 import com.avanade.rpg.entity.Session;
 
 public record LogResponseDto(Session session, SessionTeamEnum first_to_attack, int attack, int current_turn_count,

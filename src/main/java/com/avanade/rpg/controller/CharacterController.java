@@ -1,6 +1,6 @@
 package com.avanade.rpg.controller;
 
-import com.avanade.rpg.dto.CharacterDto;
+import com.avanade.rpg.dto.payloads.requests.CharacterDto;
 import com.avanade.rpg.exceptions.EntityNotFoundException;
 import com.avanade.rpg.service.CharacterService;
 import org.springframework.http.HttpStatus;

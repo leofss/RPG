@@ -1,6 +1,6 @@
 package com.avanade.rpg.entity;
 
-import com.avanade.rpg.dto.SessionResponseDto;
+import com.avanade.rpg.dto.payloads.responses.SessionResponseDto;
 import com.avanade.rpg.dto.SessionTeamEnum;
 import jakarta.persistence.*;
 import lombok.Getter;

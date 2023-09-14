@@ -1,9 +1,9 @@
 package com.avanade.rpg.controller;
 
-import com.avanade.rpg.dto.SessionRequestDto;
-import com.avanade.rpg.dto.SessionResponseDto;
-import com.avanade.rpg.dto.TurnRequestDto;
-import com.avanade.rpg.dto.TurnResponseDto;
+import com.avanade.rpg.dto.payloads.requests.SessionRequestDto;
+import com.avanade.rpg.dto.payloads.responses.SessionResponseDto;
+import com.avanade.rpg.dto.payloads.requests.TurnRequestDto;
+import com.avanade.rpg.dto.payloads.responses.TurnResponseDto;
 import com.avanade.rpg.service.SessionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

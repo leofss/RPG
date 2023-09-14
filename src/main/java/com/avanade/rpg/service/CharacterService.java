@@ -1,6 +1,6 @@
 package com.avanade.rpg.service;
 
-import com.avanade.rpg.dto.CharacterDto;
+import com.avanade.rpg.dto.payloads.requests.CharacterDto;
 import com.avanade.rpg.entity.Character;
 import com.avanade.rpg.exceptions.EntityNotFoundException;
 import com.avanade.rpg.repository.CharacterRepository;
@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Service
 public class CharacterService {
+
     private final CharacterRepository characterRepository;
 
     public CharacterService(CharacterRepository characterRepository) {
@@ -25,6 +26,7 @@ public class CharacterService {
             return true;
         }
     }
+
     public List<CharacterDto> getAllCharacters(){
         return this.characterRepository.findAll().stream()
                 .map(Character::characterToDto)

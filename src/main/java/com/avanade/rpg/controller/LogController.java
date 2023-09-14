@@ -1,6 +1,6 @@
 package com.avanade.rpg.controller;
 
-import com.avanade.rpg.dto.LogResponseDto;
+import com.avanade.rpg.dto.payloads.responses.LogResponseDto;
 import com.avanade.rpg.service.LogService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

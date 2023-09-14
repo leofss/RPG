@@ -1,6 +1,6 @@
 package com.avanade.rpg.service;
 
-import com.avanade.rpg.dto.CalculateResponseDto;
+import com.avanade.rpg.dto.payloads.responses.CalculateResponseDto;
 import com.avanade.rpg.entity.Character;
 import com.avanade.rpg.exceptions.EntityNotFoundException;
 import com.avanade.rpg.repository.CharacterRepository;

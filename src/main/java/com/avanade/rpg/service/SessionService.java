@@ -1,6 +1,10 @@
 package com.avanade.rpg.service;
 
 import com.avanade.rpg.dto.*;
+import com.avanade.rpg.dto.payloads.requests.SessionRequestDto;
+import com.avanade.rpg.dto.payloads.requests.TurnRequestDto;
+import com.avanade.rpg.dto.payloads.responses.SessionResponseDto;
+import com.avanade.rpg.dto.payloads.responses.TurnResponseDto;
 import com.avanade.rpg.entity.Character;
 import com.avanade.rpg.entity.Log;
 import com.avanade.rpg.entity.Session;

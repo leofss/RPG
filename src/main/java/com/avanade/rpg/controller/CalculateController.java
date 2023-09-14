@@ -1,6 +1,6 @@
 package com.avanade.rpg.controller;
 
-import com.avanade.rpg.dto.CalculateResponseDto;
+import com.avanade.rpg.dto.payloads.responses.CalculateResponseDto;
 import com.avanade.rpg.service.CalculateService;
 import org.springframework.web.bind.annotation.*;
 
