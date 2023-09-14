@@ -4,7 +4,7 @@ import com.avanade.rpg.entity.Character;
 import com.avanade.rpg.entity.Session;
 
 public record LogResponseDto(Session session, Character ally_id, Character enemy_id, SessionTeamEnum first_to_attack,
-                             int turn_count, int attack, int defense, int damage_done, int current_ally_hp,
+                             int attack, int defense, int damage_done, int current_ally_hp,
                              int current_enemy_hp) {
     @Override
     public Session session() {
@@ -24,11 +24,6 @@ public record LogResponseDto(Session session, Character ally_id, Character enemy
     @Override
     public SessionTeamEnum first_to_attack() {
         return first_to_attack;
-    }
-
-    @Override
-    public int turn_count() {
-        return turn_count;
     }
 
     @Override

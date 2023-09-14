@@ -32,8 +32,6 @@ public class Log {
 
     private SessionTeamEnum firstToAttack;
 
-    private int turnCount;
-
     private int attack;
 
     private int defense;
@@ -44,13 +42,12 @@ public class Log {
 
     private int currentEnemyHp;
 
-    public Log(Session session, Character allyId, Character enemyId, SessionTeamEnum firstToAttack, int turnCount, int attack, int defense,
-               int damageDone, int currentAllyHp, int currentEnemyHp){
+    public Log(Session session, Character allyId, Character enemyId, SessionTeamEnum firstToAttack, int attack,
+               int defense, int damageDone, int currentAllyHp, int currentEnemyHp){
         this.session = session;
         this.allyId = allyId;
         this.enemyId = enemyId;
         this.firstToAttack = firstToAttack;
-        this.turnCount = turnCount;
         this.attack = attack;
         this.defense = defense;
         this.damageDone = damageDone;
@@ -59,8 +56,8 @@ public class Log {
     }
 
     public LogResponseDto logToDto(){
-        return new LogResponseDto(this.session, this.allyId, this.enemyId, this.firstToAttack, this.turnCount,
-                this.attack, this.defense, this.damageDone, this.currentAllyHp, this.currentEnemyHp);
+        return new LogResponseDto(this.session, this.allyId, this.enemyId, this.firstToAttack, this.attack,
+                this.defense, this.damageDone, this.currentAllyHp, this.currentEnemyHp);
     }
 
 

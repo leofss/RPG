@@ -6,6 +6,7 @@ import com.avanade.rpg.entity.Log;
 import com.avanade.rpg.entity.Session;
 import com.avanade.rpg.exceptions.EntityNotFoundException;
 import com.avanade.rpg.exceptions.InvalidEnemyException;
+import com.avanade.rpg.exceptions.NotAttackerTurnException;
 import com.avanade.rpg.repository.CharacterRepository;
 import com.avanade.rpg.repository.LogRepository;
 import com.avanade.rpg.repository.SessionRepository;
@@ -123,7 +124,7 @@ public class SessionService {
         return sessionRepository.isAlly(sessionId, id);
     }
 
-    private void updateSessionTurnAndTeam(Long sessionId, SessionTeamEnum currentEnum){
+    private Session updateSessionTurnAndTeam(Long sessionId, SessionTeamEnum currentEnum){
         Session currentSession = retrieveSessionById(sessionId);
         int turnCount = currentSession.getTurnCount();
         currentSession.setTurnCount(turnCount + 1);
@@ -135,6 +136,8 @@ public class SessionService {
         }
 
         sessionRepository.save(currentSession);
+
+        return currentSession;
     }
 
     private int updateSessionHealthPoints(Long sessionId, SessionTeamEnum currentTurn, int damage){
@@ -173,13 +176,11 @@ public class SessionService {
     }
 
     private void createLog(Session session, int attackResult, int defenseResult, int damage){
-
         Log log = new Log(session, session.getCharacterAlly(), session.getCharacterEnemy(), firstToAttack,
-                session.getTurnCount(), attackResult, defenseResult, damage, session.getCurrentAllyHealthPoints(),
+                attackResult, defenseResult, damage, session.getCurrentAllyHealthPoints(),
                 session.getCurrentEnemyHealthPoints());
 
         logRepository.save(log);
-
     }
 
     private void setFirstToAttack(SessionTeamEnum firstToAttack){
@@ -251,8 +252,7 @@ public class SessionService {
                 : SessionTeamEnum.ENEMY;
 
         if (!isAttackerTurn(session, currentAttackerTeam)) {
-            return new TurnResponseDto(null, null, session.isSessionOver(),
-                    "Not attacker´s turn");
+            throw new NotAttackerTurnException();
         }
 
         int defenseResult = getResultFromCalculate("defense", defenderId);
@@ -267,21 +267,26 @@ public class SessionService {
             updatedHp = updateSessionHealthPoints(session.getId(), currentAttackerTeam, damage);
 
             if (updatedHp <= 0) {
-                updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
-                createLog(session, attackResult, defenseResult, damage);
+                Session currentSession = updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
+                createLog(currentSession, attackResult, defenseResult, damage);
                 endSession(session.getId());
                 return new TurnResponseDto(damage, updatedHp, true, "Defender was killed!");
             }
 
             updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
-            createLog(session, attackResult, defenseResult, damage);
+
+            Session currentSession = updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
+            createLog(currentSession, attackResult, defenseResult, damage);
+
             return new TurnResponseDto(damage, updatedHp, session.isSessionOver(), "Successful attack");
 
         } else {
             updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
 
             damage = getResultFromCalculate("damage", attackerId);
-            createLog(session, attackResult, defenseResult, damage);
+
+            Session currentSession = updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
+            createLog(currentSession, attackResult, defenseResult, damage);
 
             return new TurnResponseDto(null, null, session.isSessionOver(),
                     "Attack failed! Defender defended successfully.");
