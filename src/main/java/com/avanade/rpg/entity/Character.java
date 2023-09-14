@@ -49,7 +49,7 @@ public class Character {
         this.id = id;
     }
 
-    public CharacterDto CharacterToDto(){
+    public CharacterDto characterToDto(){
         return new CharacterDto(this.id, this.characterType, this.name, this.healthPoints, this.strength, this.defense,
                 this.agility, this.diceTimesRoll, this.diceFaces);
     }

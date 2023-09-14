@@ -1,6 +1,7 @@
 package com.avanade.rpg.controller;
 
 import com.avanade.rpg.dto.CharacterDto;
+import com.avanade.rpg.exceptions.EntityNotFoundException;
 import com.avanade.rpg.service.CharacterService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -22,12 +23,12 @@ public class CharacterController {
     }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CharacterDto createCharacter(@RequestBody CharacterDto body){
+    public CharacterDto createCharacter( @RequestBody CharacterDto body) {
         return characterService.createCharacter(body);
     }
 
     @GetMapping("/{id}")
-    public CharacterDto getOneCharacter(@PathVariable Long id){
+    public CharacterDto getOneCharacter(@PathVariable Long id) throws EntityNotFoundException {
         return characterService.getOneCharacter(id);
     }
 

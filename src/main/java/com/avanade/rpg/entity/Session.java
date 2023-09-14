@@ -55,7 +55,7 @@ public class Session {
     }
 
 
-    public SessionResponseDto SessionToResponseDto(){
+    public SessionResponseDto sessionToResponseDto(){
         return new SessionResponseDto(this.id, this.allyRollNumber, this.enemyRollNumber);
     }
 }

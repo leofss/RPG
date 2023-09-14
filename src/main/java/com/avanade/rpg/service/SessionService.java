@@ -4,6 +4,8 @@ import com.avanade.rpg.dto.*;
 import com.avanade.rpg.entity.Character;
 import com.avanade.rpg.entity.Log;
 import com.avanade.rpg.entity.Session;
+import com.avanade.rpg.exceptions.EntityNotFoundException;
+import com.avanade.rpg.exceptions.InvalidEnemyException;
 import com.avanade.rpg.repository.CharacterRepository;
 import com.avanade.rpg.repository.LogRepository;
 import com.avanade.rpg.repository.SessionRepository;
@@ -29,26 +31,26 @@ public class SessionService {
     private final SessionRepository sessionRepository;
     private final CharacterRepository characterRepository;
     private final LogRepository logRepository;
+    private final CharacterService characterService;
     private HttpServletRequest request;
 
     private SessionTeamEnum firstToAttack;
 
     public SessionService(SessionRepository sessionRepository, CharacterRepository characterRepository,
-                          HttpServletRequest request, LogRepository logRepository) {
+                          HttpServletRequest request, LogRepository logRepository, CharacterService characterService) {
         this.sessionRepository = sessionRepository;
         this.characterRepository = characterRepository;
         this.request = request;
         this.logRepository = logRepository;
+        this.characterService = characterService;
     }
 
-    private boolean checkIfCharacterExistsById(Long id){
-        return characterRepository.existsById(id);
-    }
-
-    private boolean checkIfEnemyIsMonster(Long id){
+    private void checkIfEnemyIsMonster(Long id){
         Optional<Character> character = characterRepository.findById(id);
         CharacterType type = character.get().getCharacterType();
-        return type == CharacterType.MONSTER;
+         if(type != CharacterType.MONSTER){
+             throw new InvalidEnemyException();
+         }
     }
 
     private Character retrieveCharacterById(Long id){
@@ -58,14 +60,22 @@ public class SessionService {
 
     private Session retrieveSessionById(Long id){
         Optional<Session> session = sessionRepository.findById(id);
-        return session.get();
+        if(session.isPresent()){
+            return session.get();
+        }else{
+            throw new EntityNotFoundException("Session with id " + id + " not found");
+        }
     }
 
     private Optional<Character> retrieveRandomMonster(){
         List<Character> characterList = characterRepository.findAll();
-        return characterList.stream()
-                .filter(character -> character.getCharacterType() == CharacterType.MONSTER)
-                .findFirst();
+        if(characterList.isEmpty()){
+            throw new EntityNotFoundException("Could not find any monster");
+        }else{
+            return characterList.stream()
+                    .filter(character -> character.getCharacterType() == CharacterType.MONSTER)
+                    .findFirst();
+        }
 
     }
 
@@ -155,8 +165,11 @@ public class SessionService {
         return session.getCurrentTurn().equals(currentAttackerTeam);
     }
 
-    private boolean isCharacterInSession(Long sessionId, Long characterId){
-        return sessionRepository.isCharacterInSession(sessionId, characterId);
+    private void checkIfCharacterInSession(Long sessionId, Long characterId){
+        boolean isInSession = sessionRepository.isCharacterInSession(sessionId, characterId);
+        if(!isInSession){
+            throw new EntityNotFoundException("Characters with id " + characterId + " not found in this session");
+        }
     }
 
     private void createLog(Session session, int attackResult, int defenseResult, int damage){
@@ -177,74 +190,69 @@ public class SessionService {
         Long allyId = requestDto.ally_id();
         Long enemyId = requestDto.enemy_id();
 
-
         if(enemyId == null){
             Optional<Character> character = retrieveRandomMonster();
             enemyId = character.get().getId();
         }
 
-        boolean allyExists = checkIfCharacterExistsById(allyId);
-        boolean enemyExists = checkIfCharacterExistsById(enemyId);
+        characterService.checkIfCharacterExistsById(allyId);
+        characterService.checkIfCharacterExistsById(enemyId);
+        checkIfEnemyIsMonster(enemyId);
 
-        if(allyExists && enemyExists){
-            boolean isEnemyMonster = checkIfEnemyIsMonster(enemyId);
-            if(isEnemyMonster){
-                Character characterEnemy = retrieveCharacterById(enemyId);
-                Character characterAlly = retrieveCharacterById(allyId);
+        Character characterEnemy = retrieveCharacterById(enemyId);
+        Character characterAlly = retrieveCharacterById(allyId);
 
-                int allyRoll;
-                int enemyRoll;
-                do {
-                    allyRoll = rollDice(1, 20);
-                    enemyRoll = rollDice(1, 20);
+        int allyRoll;
+        int enemyRoll;
+        do {
+            allyRoll = rollDice(1, 20);
+            enemyRoll = rollDice(1, 20);
 
-                    if(allyRoll > enemyRoll){
-                        setFirstToAttack(SessionTeamEnum.ALLY);
-                    }else{
-                        setFirstToAttack(SessionTeamEnum.ENEMY);
-                    }
-                } while (allyRoll == enemyRoll);
-
-                SessionTeamEnum currentTurn = (allyRoll > enemyRoll) ? SessionTeamEnum.ALLY : SessionTeamEnum.ENEMY;
-
-                Session session = new Session(characterAlly.getHealthPoints(), characterEnemy.getHealthPoints(),
-                        allyRoll, enemyRoll, currentTurn, characterAlly, characterEnemy, 0, false);
-
-                this.sessionRepository.save(session);
-
-                return session.SessionToResponseDto();
+            if(allyRoll > enemyRoll){
+                setFirstToAttack(SessionTeamEnum.ALLY);
+            }else{
+                setFirstToAttack(SessionTeamEnum.ENEMY);
             }
-            return null;
-        }
-        return null;
+        } while (allyRoll == enemyRoll);
+
+        SessionTeamEnum currentTurn = (allyRoll > enemyRoll) ? SessionTeamEnum.ALLY : SessionTeamEnum.ENEMY;
+
+        Session session = new Session(characterAlly.getHealthPoints(), characterEnemy.getHealthPoints(),
+                allyRoll, enemyRoll, currentTurn, characterAlly, characterEnemy, 0, false);
+
+        this.sessionRepository.save(session);
+
+        return session.sessionToResponseDto();
     }
 
     public TurnResponseDto playTurn(TurnRequestDto turnRequestDto) throws Exception {
         Session session = retrieveSessionById(turnRequestDto.session_id());
 
         if (session.isSessionOver()) {
-            return new TurnResponseDto(0, 10, session.isSessionOver(),
-                    "Sessão encerrada!");
+            return new TurnResponseDto(null, null, true,
+                    "Session is over!");
         }
 
         Long attackerId = turnRequestDto.attacker_id();
         Long defenderId = turnRequestDto.defender_id();
 
-        if (!isCharacterInSession(session.getId(), attackerId) || !isCharacterInSession(session.getId(), defenderId)) {
-            return null;
-        }
+        characterService.checkIfCharacterExistsById(attackerId);
+        characterService.checkIfCharacterExistsById(defenderId);
+
+        checkIfCharacterInSession(session.getId(), attackerId);
+        checkIfCharacterInSession(session.getId(), defenderId);
 
         if (defenderId.equals(attackerId)) {
-            return new TurnResponseDto(0, 10, session.isSessionOver()
-                    , "Não é possível atacar a si mesmo");
+            return new TurnResponseDto(null, null, session.isSessionOver(),
+                    "It is not possible to attack yourself");
         }
 
         SessionTeamEnum currentAttackerTeam = isAlly(session.getId(), attackerId) ? SessionTeamEnum.ALLY
                 : SessionTeamEnum.ENEMY;
 
         if (!isAttackerTurn(session, currentAttackerTeam)) {
-            return new TurnResponseDto(0, 10, session.isSessionOver(),
-                    "Não é seu turno");
+            return new TurnResponseDto(null, null, session.isSessionOver(),
+                    "Not attacker´s turn");
         }
 
         int defenseResult = getResultFromCalculate("defense", defenderId);
@@ -262,23 +270,22 @@ public class SessionService {
                 updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
                 createLog(session, attackResult, defenseResult, damage);
                 endSession(session.getId());
-                return new TurnResponseDto(damage, updatedHp, true, "Defensor foi abatido!");
+                return new TurnResponseDto(damage, updatedHp, true, "Defender was killed!");
             }
 
             updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
             createLog(session, attackResult, defenseResult, damage);
-            return new TurnResponseDto(damage, updatedHp, session.isSessionOver(), "Ataque com Sucesso");
+            return new TurnResponseDto(damage, updatedHp, session.isSessionOver(), "Successful attack");
+
         } else {
             updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
 
             damage = getResultFromCalculate("damage", attackerId);
             createLog(session, attackResult, defenseResult, damage);
 
-            return new TurnResponseDto(0, 10, session.isSessionOver(),
-                    "Ataque falhou");
-
+            return new TurnResponseDto(null, null, session.isSessionOver(),
+                    "Attack failed! Defender defended successfully.");
         }
-
 
     }
 }

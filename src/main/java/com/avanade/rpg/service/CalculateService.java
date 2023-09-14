@@ -2,8 +2,8 @@ package com.avanade.rpg.service;
 
 import com.avanade.rpg.dto.CalculateResponseDto;
 import com.avanade.rpg.entity.Character;
+import com.avanade.rpg.exceptions.EntityNotFoundException;
 import com.avanade.rpg.repository.CharacterRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -26,8 +26,9 @@ public class CalculateService {
             int agility = character.get().getAgility();
             int result = rollTwelve + defense + agility;
             return new CalculateResponseDto(result);
+        }else {
+            throw new EntityNotFoundException("Character with id " + id + " not found");
         }
-        return new CalculateResponseDto(0);
     }
 
     public CalculateResponseDto calculateAttack(Long id){
@@ -38,8 +39,9 @@ public class CalculateService {
             int agility = character.get().getAgility();
             int result = rollTwelve + strength + agility;
             return new CalculateResponseDto(result);
+        }else {
+            throw new EntityNotFoundException("Character with id " + id + " not found");
         }
-        return new CalculateResponseDto(0);
     }
 
     public CalculateResponseDto calculateDamage(Long id){
@@ -51,7 +53,8 @@ public class CalculateService {
             int resultDice = sessionService.rollDice(timesRollDice, facesDice);
             int result = resultDice + strength;
             return new CalculateResponseDto(result);
+        }else {
+            throw new EntityNotFoundException("Character with id " + id + " not found");
         }
-        return new CalculateResponseDto(0);
     }
 }
