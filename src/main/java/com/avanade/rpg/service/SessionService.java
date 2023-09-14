@@ -176,9 +176,9 @@ public class SessionService {
     }
 
     private void createLog(Session session, int attackResult, int defenseResult, int damage){
-        Log log = new Log(session, session.getCharacterAlly(), session.getCharacterEnemy(), firstToAttack,
-                attackResult, defenseResult, damage, session.getCurrentAllyHealthPoints(),
-                session.getCurrentEnemyHealthPoints());
+        log.info(String.valueOf(session.getTurnCount()));
+        Log log = new Log(session, firstToAttack, attackResult, session.getTurnCount(), defenseResult, damage,
+                session.getCurrentAllyHealthPoints(), session.getCurrentEnemyHealthPoints());
 
         logRepository.save(log);
     }
@@ -273,15 +273,12 @@ public class SessionService {
                 return new TurnResponseDto(damage, updatedHp, true, "Defender was killed!");
             }
 
-            updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
-
             Session currentSession = updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
             createLog(currentSession, attackResult, defenseResult, damage);
 
             return new TurnResponseDto(damage, updatedHp, session.isSessionOver(), "Successful attack");
 
         } else {
-            updateSessionTurnAndTeam(session.getId(), session.getCurrentTurn());
 
             damage = getResultFromCalculate("damage", attackerId);
 
